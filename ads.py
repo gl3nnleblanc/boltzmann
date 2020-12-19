@@ -118,8 +118,8 @@ if __name__ == "__main__":
         # Read from ADS
         data = np.array(ads.read_sample())
         # Normalize
-        data = data * 1e9 / SAMPLE_FREQ
-        fourier = abs(np.fft.fft(data))
+        data = data * 1e9 / np.sqrt(SAMPLE_FREQ)
+        fourier = abs(np.fft.fft(data, norm="ortho"))
         fourier = fourier[1:len(fourier)//2] # Exclude negative frequency
         avg = (avg * i + fourier) / (i + 1)
 
