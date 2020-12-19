@@ -98,6 +98,11 @@ class ADSUnit:
         dwf.FDwfDeviceCloseAll()
 
 
+def calc_boltzmann(cursor):
+    # TODO
+    return 0
+
+
 if __name__ == "__main__":
     # Gets gain table
     gains = pd.read_csv("../gain.csv")
@@ -159,4 +164,5 @@ if __name__ == "__main__":
         plt.legend()
         plt.show()
         cursor = float(input("Enter updated cursor value, if desired.\n"))
+        boltzmann = calc_boltzmann(cursor)
         plt.close()
