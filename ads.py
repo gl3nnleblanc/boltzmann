@@ -98,9 +98,10 @@ class ADSUnit:
         dwf.FDwfDeviceCloseAll()
 
 
-def calc_boltzmann(cursor):
-    # TODO
-    return 0
+def calc_boltzmann(cursor, R, T):
+    # Meant to input T in celcius
+    T = T + 273.15
+    return (cursor ** 2) / (4 * R * T) * 1e-18
 
 
 if __name__ == "__main__":
@@ -110,11 +111,14 @@ if __name__ == "__main__":
     # Instantiate ADS
     ads = ADSUnit()
 
+    # User inputs
     num_samples = int(input("Number of samples to average?\n"))
     doing_background = input("Collecting background noise? (Y/N)\n")
     while not (doing_background == 'Y' or doing_background == 'N'):
         doing_background = input("Please enter Y or N.\n")
     cursor = float(input("Cursor value?\n"))
+    R = float(input("Resistor value?\n"))
+    T = float(input("Temperature? (C)\n"))
 
     # Perform averaging over sample stream
     avg = np.zeros(SAMPLES//2 - 1)
@@ -135,15 +139,14 @@ if __name__ == "__main__":
     freq = np.fft.fftfreq(len(data), d=1/SAMPLE_FREQ)
     freq = freq[1:len(freq)//2]
 
-    # Normalize gain
+    # Normalize gain using gain table with cubic interpolation
     gains = pd.read_csv("../gain.csv")
     interp_freq = gains["freq"]
     interp_gain = gains["gain"]
     f = interp1d(interp_freq, interp_gain, kind='cubic')
-
     avg = avg / f(freq)
 
-    # Background
+    # Save background file or subtract background from preexisting file
     if doing_background == 'Y':
         background = pd.DataFrame()
         background["freq"] = freq
@@ -153,16 +156,17 @@ if __name__ == "__main__":
         background = pd.read_csv("../background.csv")
         avg = np.sqrt(avg ** 2 - background["val"] ** 2)
 
-    # Plot
+    # Plot & set cursor
     while True:
+        if doing_background == "N":
+            print("Measured k_B: ", calc_boltzmann(cursor, R, T), "\n")
         y = np.array([float(cursor) for _ in enumerate(avg)])
-        plt.plot(freq, y, color="red", label="Cursor")
         plt.plot(freq, avg, color="orange", label="Data")
+        plt.plot(freq, y, color="red", label="Cursor")
         plt.title(f"Average spectrum over {num_samples} samples")
         plt.xlabel("Frequency (Hz)")
         plt.ylabel("nV / sqrt(Hz)")
         plt.legend()
         plt.show()
         cursor = float(input("Enter updated cursor value, if desired.\n"))
-        boltzmann = calc_boltzmann(cursor)
         plt.close()
