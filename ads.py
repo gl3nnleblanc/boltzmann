@@ -149,12 +149,14 @@ if __name__ == "__main__":
         avg = np.sqrt(avg ** 2 - background["val"] ** 2)
 
     # Plot
-    y = np.array([float(cursor) for _ in enumerate(avg)])
-    plt.plot(freq, y, color="red", label="Cursor")
-    print(freq)
-    plt.plot(freq, avg, color="orange", label="Data")
-    plt.title(f"Average spectrum over {num_samples} samples")
-    plt.xlabel("Frequency (Hz)")
-    plt.ylabel("nV / sqrt(Hz)")
-    plt.legend()
-    plt.show()
+    while True:
+        y = np.array([float(cursor) for _ in enumerate(avg)])
+        plt.plot(freq, y, color="red", label="Cursor")
+        plt.plot(freq, avg, color="orange", label="Data")
+        plt.title(f"Average spectrum over {num_samples} samples")
+        plt.xlabel("Frequency (Hz)")
+        plt.ylabel("nV / sqrt(Hz)")
+        plt.legend()
+        plt.show()
+        cursor = float(input("Enter updated cursor value, if desired.\n"))
+        plt.close()
