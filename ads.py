@@ -109,7 +109,7 @@ if __name__ == "__main__":
     doing_background = input("Collecting background noise? (Y/N)\n")
     while not (doing_background == 'Y' or doing_background == 'N'):
         doing_background = input("Please enter Y or N.\n")
-    cursor = str(input("Cursor value?\n"))
+    cursor = float(input("Cursor value?\n"))
 
     # Perform averaging over sample stream
     avg = np.zeros(SAMPLES//2 - 1)
@@ -146,11 +146,13 @@ if __name__ == "__main__":
         background.to_csv("../background.csv")
     else:
         background = pd.read_csv("../background.csv")
-        avg -= background["val"]
+        avg = np.sqrt(avg ** 2 - background["val"] ** 2)
 
     # Plot
+    y = np.array([float(cursor) for _ in enumerate(avg)])
+    plt.plot(freq, y, color="red", label="Cursor")
+    print(freq)
     plt.plot(freq, avg, color="orange", label="Data")
-    #plt.plot(freq, [cursor for _ in enumerate(freq)], color="red", label="Cursor")
     plt.title(f"Average spectrum over {num_samples} samples")
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("nV / sqrt(Hz)")
